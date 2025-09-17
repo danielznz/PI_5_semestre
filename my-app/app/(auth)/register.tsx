@@ -1,90 +1,123 @@
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground, Image } from "react-native";
 import { Link } from "expo-router";
 
 export default function RegisterScreen() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Cadastro</Text>
+    <ImageBackground
+      source={require("../../assets/images/background.png")}
+      style={styles.background}
+    >
+      <View style={styles.overlay}>
+        <Image
+          source={require("../../assets/images/logo-azul.png")}
+          style={styles.logo}
+        />
 
-      <TextInput
-        placeholder="Nome"
-        style={styles.input}
-      />
+        <Text style={styles.subtitle}>Cadastro</Text>
 
-      <TextInput
-        placeholder="Email"
-        style={styles.input}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
+        <View style={styles.inputContainer}>
+          <TextInput
+            placeholder="Email"
+            placeholderTextColor="#aaa"
+            style={styles.input}
+          />
+        </View>
 
-      <TextInput
-        placeholder="Senha"
-        style={styles.input}
-        secureTextEntry
-      />
+        <View style={styles.inputContainer}>
+          <TextInput
+            placeholder="Email"
+            placeholderTextColor="#aaa"
+            style={styles.input}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+        </View>
 
-      <TextInput
-        placeholder="Confirmar Senha"
-        style={styles.input}
-        secureTextEntry
-      />
+        <View style={styles.inputContainer}>
+          <TextInput
+            placeholder="Senha"
+            placeholderTextColor="#aaa"
+            style={styles.input}
+            secureTextEntry
+          />
+        </View>
 
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>Cadastrar</Text>
-      </TouchableOpacity>
+        <View style={styles.inputContainer}>
+          <TextInput
+            placeholder="Confirmar Senha"
+            placeholderTextColor="#aaa"
+            style={styles.input}
+            secureTextEntry
+          />
+        </View>
 
-      {/* 🔗 Link de volta para Login */}
-      <Link href="/(auth)/login" style={styles.link}>
-        Já tem conta? Faça login
-      </Link>
-    </View>
+        <TouchableOpacity style={styles.button}>
+          <Text style={styles.buttonText}>Cadastrar</Text>
+        </TouchableOpacity>
+
+        {/* 🔗 Link de volta para Login */}
+        <Link href="/(auth)/login" style={styles.link}>
+          Já tem conta? Faça login
+        </Link>
+      </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-background: { flex: 1, justifyContent: "center" },
+  background: {
+    flex: 1,
+    justifyContent: "center",
+  },
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.6)",
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
     alignItems: "center",
     justifyContent: "center",
     padding: 20,
   },
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    padding: 20,
-    backgroundColor: "#fff",
+  logo: {
+    height: 200,
+    width: 200,
+    marginBottom: 70,
+    resizeMode: "contain",
   },
-  title: {
-    fontSize: 28,
+  subtitle: {
+    fontSize: 24,
     fontWeight: "bold",
+    color: "#f2f2f2",
     marginBottom: 30,
-    textAlign: "center",
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#1b1b1bff",
+    borderRadius: 15,
+    marginBottom: 15,
+    paddingHorizontal: 10,
+    width: "100%",
   },
   input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 15,
+    flex: 1,
+    color: "#f2f2f2",
+    height: 50,
   },
   button: {
-    backgroundColor: "#28a745",
-    padding: 15,
-    borderRadius: 8,
+    backgroundColor: "#d5a759",
+    paddingVertical: 15,
+    borderRadius: 10,
+    width: "100%",
     alignItems: "center",
-    marginTop: 10,
+    marginVertical: 20,
   },
   buttonText: {
-    color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+    color: "#000",
   },
   link: {
-    color: "#1e90ff",
-    textAlign: "center",
+    color: "#fff",
     marginTop: 10,
+    textAlign: "center",
   },
 });

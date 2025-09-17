@@ -5,12 +5,12 @@ import { Ionicons } from "@expo/vector-icons";
 export default function LoginScreen() {
   return (
     <ImageBackground
-      source={require('../../assets/images/background.png')} // caminho relativo da imagem
+      source={require('../../assets/images/background.png')} 
       style={styles.background}
     >
       <View style={styles.overlay}>
         <Image
-          source={require('../../assets/images/logo-azul.png')} // caminho relativo da imagem
+          source={require('../../assets/images/logo-azul.png')}
           style={styles.logo}
         ></Image>
         <Text style={styles.subtitle}>LOGIN</Text>
