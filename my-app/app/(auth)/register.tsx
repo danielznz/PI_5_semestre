@@ -1,7 +1,22 @@
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground, Image } from "react-native";
+import { useState } from "react";
+import { auth } from "../lib/firebaseConfig";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground, Image, Alert } from "react-native";
 import { Link } from "expo-router";
 
 export default function RegisterScreen() {
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+
+  const handleRegister = async () => {
+    try {
+      await createUserWithEmailAndPassword(auth, email, senha);
+      Alert.alert("Sucesso", "Conta criada com sucesso!");
+    } catch (error: any) {
+      Alert.alert("Erro", error.message);
+    }
+  };
+
   return (
     <ImageBackground
       source={require("../../assets/images/background.png")}
@@ -20,16 +35,10 @@ export default function RegisterScreen() {
             placeholder="Email"
             placeholderTextColor="#aaa"
             style={styles.input}
-          />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <TextInput
-            placeholder="Email"
-            placeholderTextColor="#aaa"
-            style={styles.input}
             keyboardType="email-address"
             autoCapitalize="none"
+            value={email}
+            onChangeText={setEmail}
           />
         </View>
 
@@ -39,23 +48,15 @@ export default function RegisterScreen() {
             placeholderTextColor="#aaa"
             style={styles.input}
             secureTextEntry
+            value={senha}
+            onChangeText={setSenha}
           />
         </View>
 
-        <View style={styles.inputContainer}>
-          <TextInput
-            placeholder="Confirmar Senha"
-            placeholderTextColor="#aaa"
-            style={styles.input}
-            secureTextEntry
-          />
-        </View>
-
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={handleRegister}>
           <Text style={styles.buttonText}>Cadastrar</Text>
         </TouchableOpacity>
 
-        {/* 🔗 Link de volta para Login */}
         <Link href="/(auth)/login" style={styles.link}>
           Já tem conta? Faça login
         </Link>
@@ -63,6 +64,7 @@ export default function RegisterScreen() {
     </ImageBackground>
   );
 }
+
 
 const styles = StyleSheet.create({
   background: {

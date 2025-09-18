@@ -1,16 +1,39 @@
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground, Image } from "react-native";
+import { useState } from "react";
+import { useRouter } from "expo-router";
+import { auth } from "../lib/firebaseConfig";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground, Image, Alert } from "react-native";
 import { Link } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function LoginScreen() {
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+
+const router = useRouter();
+
+const handleLogin = async () => {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, senha);
+    const user = userCredential.user;
+
+    Alert.alert("Sucesso", `Bem-vindo ${user.email}`);
+    console.log("Usuário logado:", user);
+
+    // 👇 Redireciona para a tela principal
+    router.push("/(tabs)");
+  } catch (error: any) {
+    Alert.alert("Erro", error.message);
+  }
+};
   return (
     <ImageBackground
-      source={require('../../assets/images/background.png')} 
+      source={require("../../assets/images/background.png")}
       style={styles.background}
     >
       <View style={styles.overlay}>
         <Image
-          source={require('../../assets/images/logo-azul.png')}
+          source={require("../../assets/images/logo-azul.png")}
           style={styles.logo}
         ></Image>
         <Text style={styles.subtitle}>LOGIN</Text>
@@ -23,6 +46,8 @@ export default function LoginScreen() {
             style={styles.input}
             keyboardType="email-address"
             autoCapitalize="none"
+            value={email}
+            onChangeText={setEmail}
           />
         </View>
 
@@ -33,10 +58,12 @@ export default function LoginScreen() {
             placeholderTextColor="#aaa"
             style={styles.input}
             secureTextEntry
+            value={senha}
+            onChangeText={setSenha}
           />
         </View>
 
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={handleLogin}>
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
 
