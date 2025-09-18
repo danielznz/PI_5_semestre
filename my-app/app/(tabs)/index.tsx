@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-nati
 export default function HomeScreen() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>Bem-vindo à Tríade Barbearia!</Text>
+      <Text style={styles.title}>Bem-vindo à Tríade!</Text>
       <Text style={styles.subtitle}>Escolha um de nossos serviços:</Text>
 
       <TouchableOpacity style={styles.card}>

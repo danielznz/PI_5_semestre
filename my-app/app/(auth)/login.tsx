@@ -113,12 +113,6 @@ const styles = StyleSheet.create({
     color: "#f2f2f2",
     marginBottom: 30,
   },
-  namelogo: {
-    fontSize: 16,
-    color: "#fff",
-    marginBottom: 80,
-    marginTop: -80,
-  },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",

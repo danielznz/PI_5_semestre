@@ -26,7 +26,7 @@ export default function RegisterScreen() {
       });
 
       Alert.alert("Sucesso", "Conta criada com sucesso!");
-      router.push("/login"); 
+      router.push("/login");
     } catch (error: any) {
       Alert.alert("Erro", error.message);
     }
@@ -34,62 +34,91 @@ export default function RegisterScreen() {
 
   return (
 
-<ImageBackground
-  source={require("../../assets/images/background.png")}
-  style={styles.background}
->
-  <View style={styles.overlay}>
-    <Image
-      source={require("../../assets/images/logo-azul.png")}
-      style={styles.logo}
-    />
+    <ImageBackground
+      source={require("../../assets/images/background.png")}
+      style={styles.background}
+    >
+      <View style={styles.overlay}>
+        <Image
+          source={require("../../assets/images/logo-azul.png")}
+          style={styles.logo}
+        />
 
-    <Text style={styles.subtitle}>Cadastro</Text>
+        <Text style={styles.subtitle}>CADASTRO</Text>
 
-    <View style={styles.inputContainer}>
-      <Ionicons name="mail-outline" size={20} color="#aaa" style={styles.icon} />
-      <TextInput
-        placeholder="Email"
-        placeholderTextColor="#aaa"
-        style={styles.input}
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-    </View>
+        <View style={styles.inputContainer}>
+          <Ionicons name="mail-outline" size={20} color="#aaa" style={styles.icon} />
+          <TextInput
+            placeholder="Email"
+            placeholderTextColor="#aaa"
+            style={styles.input}
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+        </View>
 
-    <View style={styles.inputContainer}>
-      <Ionicons name="lock-closed-outline" size={20} color="#aaa" style={styles.icon} />
-      <TextInput
-        placeholder="Senha"
-        placeholderTextColor="#aaa"
-        style={styles.input}
-        value={senha}
-        onChangeText={setSenha}
-        secureTextEntry
-      />
-    </View>
+        <View style={styles.inputContainer}>
+          <Ionicons name="lock-closed-outline" size={20} color="#aaa" style={styles.icon} />
+          <TextInput
+            placeholder="Senha"
+            placeholderTextColor="#aaa"
+            style={styles.input}
+            value={senha}
+            onChangeText={setSenha}
+            secureTextEntry
+          />
+        </View>
 
-    <View style={styles.inputContainer}>
-      <Text>Tipo de usuário</Text>
-      <TouchableOpacity onPress={() => setRole("cliente")}>
-        <Text>Cliente</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => setRole("admin")}>
-        <Text>Barbeiro</Text>
-      </TouchableOpacity>
-    </View>
+        <View style={styles.roleContainer}>
+          <Text style={styles.roleLabel}>Tipo de usuário</Text>
+          <View style={styles.roleOptions}>
+            <TouchableOpacity
+              style={[
+                styles.roleButton,
+                role === "cliente" && styles.roleButtonSelected,
+              ]}
+              onPress={() => setRole("cliente")}
+            >
+              <Text
+                style={[
+                  styles.roleText,
+                  role === "cliente" && styles.roleTextSelected,
+                ]}
+              >
+                Cliente
+              </Text>
+            </TouchableOpacity>
 
-    <TouchableOpacity style={styles.button} onPress={handleRegister}>
-      <Text style={styles.buttonText}>Cadastrar</Text>
-    </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.roleButton,
+                role === "admin" && styles.roleButtonSelected,
+              ]}
+              onPress={() => setRole("admin")}
+            >
+              <Text
+                style={[
+                  styles.roleText,
+                  role === "admin" && styles.roleTextSelected,
+                ]}
+              >
+                Barbeiro
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
 
-    <Link href="/(auth)/login" style={styles.link}>
-      Já possui uma conta? <Text style={{ fontWeight: "bold" }}>Faça login</Text>
-    </Link>
-  </View>
-</ImageBackground>
+        <TouchableOpacity style={styles.button} onPress={handleRegister}>
+          <Text style={styles.buttonText}>Cadastrar</Text>
+        </TouchableOpacity>
+
+        <Link href="/(auth)/login" style={styles.link}>
+          Já possui uma conta? <Text style={{ fontWeight: "bold" }}>Faça login</Text>
+        </Link>
+      </View>
+    </ImageBackground>
   );
 }
 
@@ -108,8 +137,9 @@ const styles = StyleSheet.create({
   logo: {
     height: 200,
     width: 200,
+    fontWeight: "bold",
+    color: "#fff",
     marginBottom: 70,
-    resizeMode: "contain",
   },
   subtitle: {
     fontSize: 24,
@@ -126,7 +156,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     width: "100%",
   },
-    icon: {
+  icon: {
     marginRight: 5,
   },
   input: {
@@ -152,4 +182,46 @@ const styles = StyleSheet.create({
     marginTop: 10,
     textAlign: "center",
   },
+  roleContainer: {
+    marginTop: 10,
+    alignItems: "center",
+  },
+
+  roleLabel: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 10,
+    color: "#f2f2f2",
+  },
+
+  roleOptions: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 10,
+  },
+
+  roleButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderWidth: 1,
+    borderColor: "#aaa",
+    borderRadius: 8,
+    backgroundColor: "#a1a1a1ff",
+  },
+
+  roleButtonSelected: {
+    backgroundColor: "#d5a759",
+    borderColor: "#d5a759",
+  },
+
+  roleText: {
+    fontSize: 14,
+    color: "#333",
+  },
+
+  roleTextSelected: {
+    color: "#333",
+    fontWeight: "bold",
+  },
+
 });
