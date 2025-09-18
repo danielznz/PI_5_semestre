@@ -26,7 +26,7 @@ export default function RegisterScreen() {
       });
 
       Alert.alert("Sucesso", "Conta criada com sucesso!");
-      router.push("/login"); // volta para login
+      router.push("/login"); 
     } catch (error: any) {
       Alert.alert("Erro", error.message);
     }

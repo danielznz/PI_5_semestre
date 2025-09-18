@@ -18,16 +18,16 @@ export default function LoginScreen() {
       const user = userCredential.user;
 
       // 🔍 busca role no Firestore
-const userRef = doc(db, "users", user.uid); 
-const userSnap = await getDoc(userRef);
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
 
 
       if (userSnap.exists()) {
         const data = userSnap.data();
-        if (data.role === "barbeiro") {
-          router.push("./barbeiro/index.tsx");
+        if (data.role === "admin") {
+          router.push("/barbeiro");
         } else {
-          router.push("./tabs/index.tsx");
+          router.push("/(tabs)");
         }
       } else {
         Alert.alert("Erro", "Usuário não encontrado no Firestore.");
