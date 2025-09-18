@@ -1,31 +1,42 @@
-import { useState } from "react";
-import { useRouter } from "expo-router";
-import { auth } from "../lib/firebaseConfig";
+import React, { useState } from "react";
+import { View, Text, TextInput, TouchableOpacity, Alert, ImageBackground, Image, StyleSheet } from "react-native";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground, Image, Alert } from "react-native";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "../lib/firebaseConfig";
+import { useRouter } from "expo-router";
 import { Link } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const router = useRouter();
 
-const router = useRouter();
+  const handleLogin = async () => {
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, senha);
+      const user = userCredential.user;
 
-const handleLogin = async () => {
-  try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, senha);
-    const user = userCredential.user;
+      // 🔍 busca role no Firestore
+const userRef = doc(db, "users", user.uid); 
+const userSnap = await getDoc(userRef);
 
-    Alert.alert("Sucesso", `Bem-vindo ${user.email}`);
-    console.log("Usuário logado:", user);
 
-    // 👇 Redireciona para a tela principal
-    router.push("/(tabs)");
-  } catch (error: any) {
-    Alert.alert("Erro", error.message);
-  }
-};
+      if (userSnap.exists()) {
+        const data = userSnap.data();
+        if (data.role === "barbeiro") {
+          router.push("./barbeiro/index.tsx");
+        } else {
+          router.push("./tabs/index.tsx");
+        }
+      } else {
+        Alert.alert("Erro", "Usuário não encontrado no Firestore.");
+      }
+    } catch (error: any) {
+      Alert.alert("Erro", error.message);
+    }
+  };
+
   return (
     <ImageBackground
       source={require("../../assets/images/background.png")}
@@ -35,7 +46,8 @@ const handleLogin = async () => {
         <Image
           source={require("../../assets/images/logo-azul.png")}
           style={styles.logo}
-        ></Image>
+        />
+
         <Text style={styles.subtitle}>LOGIN</Text>
 
         <View style={styles.inputContainer}>
@@ -44,10 +56,10 @@ const handleLogin = async () => {
             placeholder="Email"
             placeholderTextColor="#aaa"
             style={styles.input}
-            keyboardType="email-address"
-            autoCapitalize="none"
             value={email}
             onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
           />
         </View>
 
@@ -57,9 +69,9 @@ const handleLogin = async () => {
             placeholder="Senha"
             placeholderTextColor="#aaa"
             style={styles.input}
-            secureTextEntry
             value={senha}
             onChangeText={setSenha}
+            secureTextEntry
           />
         </View>
 
@@ -74,6 +86,7 @@ const handleLogin = async () => {
     </ImageBackground>
   );
 }
+
 
 const styles = StyleSheet.create({
   background: {
