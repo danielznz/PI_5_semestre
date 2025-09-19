@@ -21,12 +21,9 @@ export default function HomeScreen() {
         </Text>
         <Text style={styles.subtitle}>Escolha um de nossos serviços:</Text>
 
-        <TouchableOpacity style={styles.card}>
+        <TouchableOpacity style={styles.card} onPress={() => router.push("./agendamento")}>
           <View style={styles.circleContainer}>
-            <Image
-              source={require("../../assets/images/agenda.png")}
-              style={styles.imgcard}
-            />
+            <Image source={require("../../assets/images/agenda.png")} style={styles.imgcard} />
           </View>
           <Text style={styles.cardTitle}>Agendar Horário</Text>
           <Text style={styles.cardSubtitle}>Agende seu horário com facilidade</Text>
@@ -57,8 +54,6 @@ export default function HomeScreen() {
     </View>
   );
 }
-
-
 
 const styles = StyleSheet.create({
   container: {
@@ -130,8 +125,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#1b1b1bff",
     alignItems: "center",
-    borderWidth: 1.5,  
-    borderColor: "#d5a759",  
+    borderWidth: 1.5,
+    borderColor: "#d5a759",
     marginBottom: 10,
   },
 });

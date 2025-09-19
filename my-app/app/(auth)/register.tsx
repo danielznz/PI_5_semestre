@@ -71,45 +71,6 @@ export default function RegisterScreen() {
           />
         </View>
 
-        <View style={styles.roleContainer}>
-          <Text style={styles.roleLabel}>Tipo de usuário</Text>
-          <View style={styles.roleOptions}>
-            <TouchableOpacity
-              style={[
-                styles.roleButton,
-                role === "cliente" && styles.roleButtonSelected,
-              ]}
-              onPress={() => setRole("cliente")}
-            >
-              <Text
-                style={[
-                  styles.roleText,
-                  role === "cliente" && styles.roleTextSelected,
-                ]}
-              >
-                Cliente
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.roleButton,
-                role === "admin" && styles.roleButtonSelected,
-              ]}
-              onPress={() => setRole("admin")}
-            >
-              <Text
-                style={[
-                  styles.roleText,
-                  role === "admin" && styles.roleTextSelected,
-                ]}
-              >
-                Barbeiro
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
         <TouchableOpacity style={styles.button} onPress={handleRegister}>
           <Text style={styles.buttonText}>Cadastrar</Text>
         </TouchableOpacity>
