@@ -2,7 +2,7 @@ import { Slot, Stack } from "expo-router";
 import { useState } from "react";
 
 export default function RootLayout() {
-  const [isLoggedIn] = useState(false); // por enquanto fixo
+  const [isLoggedIn] = useState(false);
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
