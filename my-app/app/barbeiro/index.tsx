@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from "rea
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
+
 export default function BarbeiroDashboard() {
   const router = useRouter();
 
@@ -21,7 +22,10 @@ export default function BarbeiroDashboard() {
         </Text>
         <Text style={styles.subtitle}>Gerencie suas funções abaixo:</Text>
 
-        <TouchableOpacity style={styles.card}>
+        <TouchableOpacity
+          style={styles.card}
+          onPress={() => router.push("/barbeiro/cadastrar")}
+        >
           <View style={styles.circleContainer}>
             <Image
               source={require("../../assets/images/hairstyle.png")}
@@ -32,7 +36,10 @@ export default function BarbeiroDashboard() {
           <Text style={styles.cardSubtitle}>Adicione novos serviços disponíveis</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.card}>
+      <TouchableOpacity
+          style={styles.card}
+          onPress={() => router.push("/barbeiro/horario")}
+        >
           <View style={styles.circleContainer}>
             <Image
               source={require("../../assets/images/time.png")}
