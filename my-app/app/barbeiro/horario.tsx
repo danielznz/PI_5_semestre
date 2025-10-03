@@ -34,16 +34,16 @@ export default function DefinirHorario() {
 
       const dadosBarbeiro = userSnap.data();
 
-      // Converte para objeto Date
+      // Converte strings em partes (dd/mm/yyyy e hh:mm)
       const [dia, mes, ano] = data.split("/");
       const [h, m] = hora.split(":");
       const date = new Date(+ano, +mes - 1, +dia, +h, +m);
 
-      // Salva no Firestore
+      // 🔥 Agora salva a data e hora separadas também (dd/mm/yyyy e HH:mm)
       await addDoc(collection(db, "horarios"), {
-        barbeiroId: user.uid,
-        barbeiroNome: dadosBarbeiro.nome, // 👈 agora pega dinamicamente
-        dataHora: date,
+        barbeiro: dadosBarbeiro.nome,
+        data: `${dia}/${mes}/${ano}`,  // 👈 salvo em dd/mm/yyyy
+        hora: `${h.padStart(2, "0")}:${m.padStart(2, "0")}`, // 👈 salvo em HH:mm
         disponibilidade: true,
       });
 
