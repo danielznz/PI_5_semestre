@@ -29,7 +29,7 @@ export default function HomeScreen() {
           <Text style={styles.cardSubtitle}>Agende seu horário com facilidade</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.card}>
+        <TouchableOpacity style={styles.card} onPress={() => router.push("./historico")}>
           <View style={styles.circleContainer}>
             <Image
               source={require("../../assets/images/historico.png")}

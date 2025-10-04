@@ -4,7 +4,8 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { db } from "../lib/firebaseConfig";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+import { collection, query, where, getDocs, serverTimestamp, addDoc } from "firebase/firestore";
 
 export default function Agendamento() {
   const router = useRouter();
@@ -14,9 +15,10 @@ export default function Agendamento() {
 
   const [hora, setHora] = useState<string | null>(null);
   const [barbeiro, setBarbeiro] = useState<string | null>(null);
-  const [servico, setServico] = useState<string | null>(null);
+  const [servico, setServico] = useState<any | null>(null);
 
   const [horariosDisponiveis, setHorariosDisponiveis] = useState<any[]>([]);
+  const [servicosDisponiveis, setServicosDisponiveis] = useState<any[]>([]);
 
   // Mapeando barbeiros
   const barbeirosMap: Record<string, { nome: string; foto: any }> = {
@@ -24,74 +26,117 @@ export default function Agendamento() {
     Igor: { nome: "Igor", foto: require("../../assets/images/perfil.png") },
   };
 
+  // Buscar horários disponíveis
+  useEffect(() => {
+    const fetchDisponibilidades = async () => {
+      if (!barbeiro) {
+        setHorariosDisponiveis([]);
+        return;
+      }
+
+      try {
+        const ref = collection(db, "horarios");
+        const q = query(
+          ref,
+          where("barbeiro", "==", barbeiro),
+          where("disponibilidade", "==", true)
+        );
+
+        const snap = await getDocs(q);
+
+        const selectedDateBR = date.toLocaleDateString("pt-BR"); // "10/10/2025"
+
+        const timeToMinutes = (t?: string) => {
+          if (!t) return Infinity;
+          const [h, m] = t.split(":").map(Number);
+          return h * 60 + m;
+        };
+
+        const mapped = snap.docs.map((doc) => {
+          const d = doc.data();
+          return {
+            id: doc.id,
+            barbeiro: d.barbeiro ?? null,
+            data: d.data,
+            hora: d.hora,
+            disponibilidade: d.disponibilidade ?? true,
+          };
+        });
+
+        const filteredByDate = mapped.filter((h) => h.data === selectedDateBR);
+        const ordenados = filteredByDate.sort((a, b) => timeToMinutes(a.hora) - timeToMinutes(b.hora));
+
+        setHorariosDisponiveis(ordenados);
+      } catch (err) {
+        console.error("Erro ao buscar horários:", err);
+        setHorariosDisponiveis([]);
+      }
+    };
+
+    fetchDisponibilidades();
+  }, [barbeiro, date]);
+
+// Buscar serviços do barbeiro selecionado
 useEffect(() => {
-  const fetchDisponibilidades = async () => {
+  const fetchServicos = async () => {
     if (!barbeiro) {
-      setHorariosDisponiveis([]);
+      setServicosDisponiveis([]);
       return;
     }
 
     try {
-      const ref = collection(db, "horarios");
-      const q = query(
-        ref,
-        where("barbeiro", "==", barbeiro), 
-        where("disponibilidade", "==", true)
-      );
-
+      const ref = collection(db, "servicos");
+      const q = query(ref, where("barbeiro", "==", barbeiro));
       const snap = await getDocs(q);
 
-      // data escolhida pelo usuário no formato dd/mm/yyyy
-      const selectedDateBR = date.toLocaleDateString("pt-BR"); // "10/10/2025"
+      const servicos = snap.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
 
-      // helper: converte "HH:mm" -> minutos (para ordenar)
-      const timeToMinutes = (t?: string) => {
-        if (!t) return Infinity;
-        const [h, m] = t.split(":").map(Number);
-        return h * 60 + m;
-      };
-
-      const mapped = snap.docs.map((doc) => {
-        const d = doc.data();
-        return {
-          id: doc.id,
-          barbeiro: d.barbeiro ?? d.barbeiroNome ?? null,
-          data: d.data,   // já vem salvo "10/10/2025"
-          hora: d.hora,
-          disponibilidade: d.disponibilidade ?? true,
-        };
-      });
-
-      // 🔥 agora filtra usando dd/mm/yyyy
-      const filteredByDate = mapped.filter((h) => h.data === selectedDateBR);
-
-      // ordena por hora
-      const ordenados = filteredByDate.sort((a, b) => timeToMinutes(a.hora) - timeToMinutes(b.hora));
-
-      setHorariosDisponiveis(ordenados);
+      setServicosDisponiveis(servicos);
     } catch (err) {
-      console.error("Erro ao buscar horários:", err);
-      setHorariosDisponiveis([]);
+      console.error("Erro ao buscar serviços:", err);
     }
   };
 
-  fetchDisponibilidades();
-}, [barbeiro, date]);
+  fetchServicos();
+}, [barbeiro]);
 
 
+const handleAgendar = async () => {
+  if (!date || !hora || !servico || !barbeiro) {
+    alert("⚠️ Preencha todos os campos!");
+    return;
+  }
 
-  const handleAgendar = () => {
-    if (!date || !hora || !servico || !barbeiro) {
-      alert("⚠️ Preencha todos os campos!");
+  try {
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    if (!user) {
+      alert("❌ Usuário não autenticado!");
       return;
     }
 
-    alert(`✅ Agendamento criado:
-Dia: ${date.toLocaleDateString("pt-BR")}
-Hora: ${hora}
-Barbeiro: ${barbeiro}
-Serviço: ${servico}`);
-  };
+    await addDoc(collection(db, "agendamentos"), {
+      barbeiro,
+      servico: servico.nome,
+      preco: servico.preco,
+      data: date.toLocaleDateString("pt-BR"),
+      hora,
+      emailcliente: user.email, // 🔥 pega o email do usuário logado
+      createdAt: serverTimestamp(),
+    });
+
+    alert("✅ Agendamento salvo com sucesso!");
+
+  } catch (err) {
+    console.error("Erro ao salvar agendamento:", err);
+    alert("❌ Erro ao salvar agendamento.");
+  }
+};
+
 
   return (
     <ScrollView style={styles.container}>
@@ -152,20 +197,30 @@ Serviço: ${servico}`);
           ))
         )}
       </View>
-
-      {/* Selecionar Serviço */}
-      <Text style={styles.label}>Selecione o serviço:</Text>
-      <View style={styles.optionsContainer}>
-        {["Corte", "Barba", "Corte + Barba"].map((s) => (
+{/* Selecionar Serviço */}
+{barbeiro && (
+  <>
+    <Text style={styles.label}>Selecione o serviço:</Text>
+    <View style={styles.optionsContainer}>
+      {servicosDisponiveis.length === 0 ? (
+        <Text style={{ color: "#fff" }}>Nenhum serviço disponível para {barbeiro}</Text>
+      ) : (
+        servicosDisponiveis.map((s) => (
           <TouchableOpacity
-            key={s}
-            style={[styles.option, servico === s && styles.optionSelected]}
+            key={s.id}
+            style={[styles.option, servico?.id === s.id && styles.optionSelected]}
             onPress={() => setServico(s)}
           >
-            <Text style={styles.optionText}>{s}</Text>
+            <Text style={styles.optionText}>
+              {s.nome} - R$ {s.preco}
+            </Text>
           </TouchableOpacity>
-        ))}
-      </View>
+        ))
+      )}
+    </View>
+  </>
+)}
+
 
       {/* Botão Agendar */}
       <TouchableOpacity style={styles.button} onPress={handleAgendar}>
@@ -224,7 +279,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
-    width: 110,
+    width: 150,
   },
   optionSelected: {
     backgroundColor: "#d5a759",

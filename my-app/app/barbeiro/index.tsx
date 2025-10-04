@@ -50,7 +50,8 @@ export default function BarbeiroDashboard() {
           <Text style={styles.cardSubtitle}>Gerencie seus horários de trabalho</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.card}>
+        <TouchableOpacity style={styles.card}
+            onPress={() => router.push("/barbeiro/agendamentos")}>
           <View style={styles.circleContainer}>
             <Image
               source={require("../../assets/images/checklist.png")}

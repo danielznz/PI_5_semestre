@@ -13,30 +13,31 @@ export default function CadastrarServico() {
   const [descricao, setDescricao] = useState("");
 
   const salvarServico = async () => {
-    if (!nome || !categoria || !preco || !descricao) {
-      alert("⚠️ Preencha todos os campos!");
-      return;
-    }
+  if (!nome || !categoria || !preco || !descricao) {
+    alert("⚠️ Preencha todos os campos!");
+    return;
+  }
 
-    try {
-      await addDoc(collection(db, "servicos"), {
-        nome,
-        categoria,
-        preco: parseFloat(preco), // 🔥 salva como número
-        descricao,
-        createdAt: serverTimestamp(),
-      });
+  try {
+    await addDoc(collection(db, "servicos"), {
+      nome,
+      categoria,
+      preco: parseFloat(preco), // 🔥 salva como número
+      descricao,
+      barbeiro: "Igor", // <- aqui você coloca dinamicamente o barbeiro logado
+      createdAt: serverTimestamp(),
+    });
 
-      alert("✅ Serviço cadastrado com sucesso!");
-      setNome("");
-      setCategoria("");
-      setPreco("");
-      setDescricao("");
-    } catch (error) {
-      console.error("Erro ao salvar serviço:", error);
-      alert("❌ Erro ao salvar serviço.");
-    }
-  };
+    alert("✅ Serviço cadastrado com sucesso!");
+    setNome("");
+    setCategoria("");
+    setPreco("");
+    setDescricao("");
+  } catch (error) {
+    console.error("Erro ao salvar serviço:", error);
+    alert("❌ Erro ao salvar serviço.");
+  }
+};
 
   return (
     <View style={styles.container}>
