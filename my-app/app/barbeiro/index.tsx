@@ -62,7 +62,8 @@ export default function BarbeiroDashboard() {
           <Text style={styles.cardSubtitle}>Acompanhe os agendamentos marcados</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.card}>
+        <TouchableOpacity style={styles.card}
+              onPress={() => router.push("/barbeiro/estatisticas")}>
           <View style={styles.circleContainer}>
             <Image
               source={require("../../assets/images/statistics.png")}
@@ -72,6 +73,7 @@ export default function BarbeiroDashboard() {
           <Text style={styles.cardTitle}>Suas Estatisticas</Text>
           <Text style={styles.cardSubtitle}>Veja seus Resultados</Text>
         </TouchableOpacity>
+
       </ScrollView>
     </View>
   );
