@@ -38,9 +38,18 @@ export default function Agendamento() {
   const [servicosDisponiveis, setServicosDisponiveis] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const barbeirosMap: Record<string, { nome: string; foto: any }> = {
-    Matheus: { nome: "Matheus", foto: require("../../assets/images/perfil.png") },
-    Igor: { nome: "Igor", foto: require("../../assets/images/perfil.png") },
+  // ✅ Agora cada barbeiro tem email real (usado no Firestore)
+  const barbeirosMap: Record<string, { nome: string; foto: any; email: string }> = {
+    Matheus: {
+      nome: "Matheus",
+      foto: require("../../assets/images/matheus.png"),
+      email: "matheus@gmail.com",
+    },
+    Igor: {
+      nome: "Igor",
+      foto: require("../../assets/images/igor.png"),
+      email: "igor@barbearia.com",
+    },
   };
 
   // Buscar horários disponíveis
@@ -68,21 +77,21 @@ export default function Agendamento() {
           return h * 60 + m;
         };
 
-    const mapped = snap.docs.map((doc) => {
-  const d = doc.data() as {
-    barbeiro?: string;
-    data?: string;
-    hora?: string;
-    disponibilidade?: boolean;
-  };
-    return {
-    id: doc.id,
-    barbeiro: d.barbeiro ?? "",
-    data: d.data ?? "",
-    hora: d.hora ?? "",
-    disponibilidade: d.disponibilidade ?? true,
-  };
-});
+        const mapped = snap.docs.map((doc) => {
+          const d = doc.data() as {
+            barbeiro?: string;
+            data?: string;
+            hora?: string;
+            disponibilidade?: boolean;
+          };
+          return {
+            id: doc.id,
+            barbeiro: d.barbeiro ?? "",
+            data: d.data ?? "",
+            hora: d.hora ?? "",
+            disponibilidade: d.disponibilidade ?? true,
+          };
+        });
 
         const filteredByDate = mapped.filter((h) => h.data === selectedDateBR);
         const ordenados = filteredByDate.sort(
@@ -143,14 +152,22 @@ export default function Agendamento() {
         return;
       }
 
-      // Salvar o agendamento
+      const barbeiroEmail = barbeirosMap[barbeiro]?.email;
+
+      if (!barbeiroEmail) {
+        alert("❌ Erro: e-mail do barbeiro não encontrado.");
+        return;
+      }
+
+      // ✅ Agora salva o email real do barbeiro
       await addDoc(collection(db, "agendamentos"), {
-        barbeiro,
+        barbeiro: barbeiroEmail,
         servico: servico.nome,
         preco: servico.preco,
         data: date.toLocaleDateString("pt-BR"),
         hora,
         emailcliente: user.email,
+        status: "pendente",
         createdAt: serverTimestamp(),
       });
 
@@ -177,7 +194,7 @@ export default function Agendamento() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={28} color="#fff" />
+          <Ionicons name="arrow-back" size={28} color="#f2f2f2" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Novo Agendamento</Text>
       </View>
@@ -185,14 +202,15 @@ export default function Agendamento() {
       {/* Selecionar Data */}
       <Text style={styles.label}>Selecione o dia:</Text>
       <TouchableOpacity style={styles.selectButton} onPress={() => setShowDatePicker(true)}>
-        <Text>{date.toLocaleDateString("pt-BR")}</Text>
+        <Text style={{ fontWeight: "bold" }}>{date.toLocaleDateString("pt-BR")}</Text>
       </TouchableOpacity>
+
       {showDatePicker && (
         <DateTimePicker
           value={date}
           mode="date"
           display="default"
-          minimumDate={new Date()} // 🔒 Bloqueia datas passadas
+          minimumDate={new Date()}
           onChange={(event, selectedDate) => {
             setShowDatePicker(false);
             if (selectedDate) setDate(selectedDate);
@@ -223,7 +241,7 @@ export default function Agendamento() {
       <Text style={styles.label}>Selecione a hora:</Text>
       <View style={styles.optionsContainer}>
         {horariosDisponiveis.length === 0 ? (
-          <Text style={{ color: "#fff" }}>Nenhum horário disponível</Text>
+          <Text style={styles.emptyText}>Nenhum horário disponível</Text>
         ) : (
           horariosDisponiveis.map((h) => (
             <TouchableOpacity
@@ -243,7 +261,9 @@ export default function Agendamento() {
           <Text style={styles.label}>Selecione o serviço:</Text>
           <View style={styles.optionsContainer}>
             {servicosDisponiveis.length === 0 ? (
-              <Text style={{ color: "#fff" }}>Nenhum serviço disponível para {barbeiro}</Text>
+              <Text style={styles.emptyText}>
+                Nenhum serviço disponível para {barbeiro}
+              </Text>
             ) : (
               servicosDisponiveis.map((s) => (
                 <TouchableOpacity
@@ -252,7 +272,7 @@ export default function Agendamento() {
                   onPress={() => setServico(s)}
                 >
                   <Text style={styles.optionText}>
-                    {s.nome} - R$ {s.preco}
+                    {s.nome} — R$ {s.preco}
                   </Text>
                 </TouchableOpacity>
               ))
@@ -263,11 +283,11 @@ export default function Agendamento() {
 
       {/* Resumo */}
       {servico && hora && (
-        <View style={{ marginTop: 25 }}>
-          <Text style={{ color: "#f2f2f2", fontSize: 16 }}>
+        <View style={styles.resumoBox}>
+          <Text style={styles.resumoText}>
             💈 {servico.nome} — R$ {servico.preco}
           </Text>
-          <Text style={{ color: "#f2f2f2" }}>
+          <Text style={styles.resumoText}>
             📅 {date.toLocaleDateString("pt-BR")} às {hora} com {barbeiro}
           </Text>
         </View>
@@ -276,7 +296,7 @@ export default function Agendamento() {
       {/* Botão Agendar */}
       <TouchableOpacity style={styles.button} onPress={handleAgendar} disabled={loading}>
         {loading ? (
-          <ActivityIndicator color="#1b1b1bff" />
+          <ActivityIndicator color="#1b1b1b" />
         ) : (
           <Text style={styles.buttonText}>Agendar</Text>
         )}
@@ -288,7 +308,7 @@ export default function Agendamento() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#1b1b1bff",
+    backgroundColor: "#1b1b1b",
     padding: 16,
   },
   header: {
@@ -307,15 +327,9 @@ const styles = StyleSheet.create({
   },
   label: {
     color: "#f2f2f2",
-    marginTop: 30,
+    marginTop: 25,
     marginBottom: 8,
     fontSize: 16,
-  },
-  optionText: {
-    color: "#f2f2f2",
-    fontSize: 16,
-    fontWeight: "900",
-    textAlign: "center",
   },
   selectButton: {
     backgroundColor: "#f2f2f2",
@@ -329,31 +343,56 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   option: {
-    backgroundColor: "#333",
-    padding: 10,
+    backgroundColor: "#2b2b2b",
+    padding: 12,
     borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
     width: 150,
+    borderWidth: 2,
+    borderColor: "transparent",
   },
   optionSelected: {
-    backgroundColor: "#d5a759",
+    borderColor: "#d5a759",
+    backgroundColor: "#3a3a3a",
   },
   barbeiroImg: {
     width: 60,
     height: 60,
-    borderRadius: 25,
+    borderRadius: 30,
     marginBottom: 6,
+  },
+  optionText: {
+    color: "#f2f2f2",
+    fontSize: 15,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  emptyText: {
+    color: "#aaa",
+    fontSize: 14,
+    marginTop: 5,
+  },
+  resumoBox: {
+    marginTop: 25,
+    backgroundColor: "#2b2b2b",
+    padding: 15,
+    borderRadius: 8,
+  },
+  resumoText: {
+    color: "#f2f2f2",
+    fontSize: 15,
+    marginBottom: 5,
   },
   button: {
     backgroundColor: "#d5a759",
     padding: 14,
     borderRadius: 8,
     alignItems: "center",
-    marginTop: 40,
+    marginTop: 30,
   },
   buttonText: {
-    color: "#1b1b1bff",
+    color: "#1b1b1b",
     fontSize: 16,
     fontWeight: "bold",
   },

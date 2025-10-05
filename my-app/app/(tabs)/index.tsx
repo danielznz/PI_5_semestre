@@ -36,19 +36,8 @@ export default function HomeScreen() {
               style={styles.imgcard}
             />
           </View>
-          <Text style={styles.cardTitle}>Histórico de Agendamentos</Text>
+          <Text style={styles.cardTitle}>Histórico e Avaliações</Text>
           <Text style={styles.cardSubtitle}>Gerencie seus agendamentos</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.card}>
-          <View style={styles.circleContainer}>
-            <Image
-              source={require("../../assets/images/estrelas.png")}
-              style={styles.imgcard}
-            />
-          </View>
-          <Text style={styles.cardTitle}>Avaliações</Text>
-          <Text style={styles.cardSubtitle}>Avalie seus agendamentos passados</Text>
         </TouchableOpacity>
       </ScrollView>
     </View>

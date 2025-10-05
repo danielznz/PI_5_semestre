@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { db, auth } from "../lib/firebaseConfig"; // 🔥 importa também o auth
+import { db, auth } from "../lib/firebaseConfig";
 import { collection, addDoc, serverTimestamp, doc, getDoc } from "firebase/firestore";
 
 export default function CadastrarServico() {
@@ -21,15 +21,13 @@ export default function CadastrarServico() {
 
     try {
       setLoading(true);
-
-      // 🔥 pega o usuário logado
       const user = auth.currentUser;
       if (!user) {
         alert("Usuário não autenticado!");
         return;
       }
 
-      // 🔥 busca o nome do barbeiro logado no Firestore
+      // 🔥 Buscar dados do barbeiro logado
       const userRef = doc(db, "users", user.uid);
       const userSnap = await getDoc(userRef);
 
@@ -40,13 +38,14 @@ export default function CadastrarServico() {
 
       const dadosBarbeiro = userSnap.data();
 
-      // 🔥 salva o serviço com o nome do barbeiro logado
+      // 🔥 Salvar serviço vinculado ao UID do barbeiro
       await addDoc(collection(db, "servicos"), {
         nome,
         categoria,
         preco: parseFloat(preco),
         descricao,
         barbeiro: dadosBarbeiro.nome || "Desconhecido",
+        barbeiroUid: user.uid, // <-- 🔑 vínculo único
         createdAt: serverTimestamp(),
       });
 
@@ -78,13 +77,13 @@ export default function CadastrarServico() {
         <Text style={styles.label}>Nome do Serviço:</Text>
         <TextInput
           style={styles.input}
-          placeholder="Exemplo: Coloração de cabelo"
+          placeholder="Exemplo: Corte degradê"
           placeholderTextColor="#999"
           value={nome}
           onChangeText={setNome}
         />
 
-        <Text style={styles.label}>Categoria do Serviço:</Text>
+        <Text style={styles.label}>Categoria:</Text>
         <TextInput
           style={styles.input}
           placeholder="Exemplo: Cabelo"
@@ -93,7 +92,7 @@ export default function CadastrarServico() {
           onChangeText={setCategoria}
         />
 
-        <Text style={styles.label}>Preço:</Text>
+        <Text style={styles.label}>Preço (R$):</Text>
         <TextInput
           style={styles.input}
           placeholder="Exemplo: 50"
@@ -106,7 +105,7 @@ export default function CadastrarServico() {
         <Text style={styles.label}>Descrição:</Text>
         <TextInput
           style={[styles.input, styles.textarea]}
-          placeholder="Exemplo: Descoloração feita com produtos especializados..."
+          placeholder="Exemplo: Corte com máquina e acabamento"
           placeholderTextColor="#999"
           multiline
           numberOfLines={4}
@@ -114,23 +113,22 @@ export default function CadastrarServico() {
           onChangeText={setDescricao}
         />
 
-        {/* Botão Salvar */}
-        <TouchableOpacity style={styles.saveButton} onPress={salvarServico}>
-          <Text style={styles.saveText}>Salvar</Text>
+        {/* Botão salvar */}
+        <TouchableOpacity style={styles.saveButton} onPress={salvarServico} disabled={loading}>
+          <Text style={styles.saveText}>{loading ? "Salvando..." : "Salvar"}</Text>
         </TouchableOpacity>
 
-        {/* Botão Gerenciar */}
+        {/* Botão para gerenciar */}
         <TouchableOpacity
           style={styles.manageButton}
           onPress={() => router.push("/barbeiro/gerenciar")}
         >
-          <Text style={styles.manageText}>Gerencie seus serviços</Text>
+          <Text style={styles.manageText}>Gerenciar meus serviços</Text>
         </TouchableOpacity>
       </ScrollView>
     </View>
   );
 }
-
 
 const styles = StyleSheet.create({
   container: {
@@ -176,7 +174,7 @@ const styles = StyleSheet.create({
     textAlignVertical: "top",
   },
   saveButton: {
-    backgroundColor: "#003087", // Azul
+    backgroundColor: "#003087",
     padding: 15,
     borderRadius: 8,
     alignItems: "center",
@@ -188,7 +186,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   manageButton: {
-    backgroundColor: "#aaa", // Cinza
+    backgroundColor: "#aaa",
     padding: 15,
     borderRadius: 8,
     alignItems: "center",

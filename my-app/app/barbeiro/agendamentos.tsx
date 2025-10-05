@@ -1,9 +1,25 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { db } from "../lib/firebaseConfig";
-import { collection, query, where, getDocs, updateDoc, deleteDoc, doc } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  onSnapshot,
+  updateDoc,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
 export default function AgendamentosAdm() {
@@ -12,29 +28,31 @@ export default function AgendamentosAdm() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchAgendamentos = async () => {
-      try {
-        const ref = collection(db, "agendamentos");
-        // pega todos os docs sem filtro
-        const snap = await getDocs(ref);
+    const auth = getAuth();
+    const user = auth.currentUser;
 
-        const data = snap.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+    if (!user) {
+      console.log("Nenhum barbeiro logado.");
+      setLoading(false);
+      return;
+    }
 
-        setAgendamentos(data);
-      } catch (err) {
-        console.error("Erro ao buscar agendamentos:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+    // ✅ escuta em tempo real os agendamentos do barbeiro logado (pelo email)
+    const ref = collection(db, "agendamentos");
+    const q = query(ref, where("barbeiro", "==", user.email));
 
-    fetchAgendamentos();
+    const unsubscribe = onSnapshot(q, (snap) => {
+      const data = snap.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+      }));
+      setAgendamentos(data);
+      setLoading(false);
+    });
+
+    // encerra listener ao desmontar o componente
+    return () => unsubscribe();
   }, []);
-
-
 
   const handleCancelar = (id: string) => {
     Alert.alert(
@@ -48,11 +66,10 @@ export default function AgendamentosAdm() {
           onPress: async () => {
             try {
               await deleteDoc(doc(db, "agendamentos", id));
-              setAgendamentos((prev) => prev.filter((a) => a.id !== id));
-              Alert.alert("Sucesso", "Agendamento cancelado!");
+              Alert.alert("✅ Sucesso", "Agendamento cancelado!");
             } catch (err) {
               console.error("Erro ao cancelar:", err);
-              Alert.alert("Erro", "Não foi possível cancelar.");
+              Alert.alert("❌ Erro", "Não foi possível cancelar.");
             }
           },
         },
@@ -62,16 +79,11 @@ export default function AgendamentosAdm() {
 
   const handleConfirmar = async (id: string) => {
     try {
-      await updateDoc(doc(db, "agendamentos", id), {
-        status: "concluido",
-      });
-      setAgendamentos((prev) =>
-        prev.map((a) => (a.id === id ? { ...a, status: "concluido" } : a))
-      );
-      Alert.alert("Sucesso", "Agendamento confirmado como concluído!");
+      await updateDoc(doc(db, "agendamentos", id), { status: "concluido" });
+      Alert.alert("✅ Sucesso", "Agendamento marcado como concluído!");
     } catch (err) {
       console.error("Erro ao confirmar:", err);
-      Alert.alert("Erro", "Não foi possível confirmar.");
+      Alert.alert("❌ Erro", "Não foi possível confirmar.");
     }
   };
 
@@ -81,49 +93,53 @@ export default function AgendamentosAdm() {
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={28} color="#333" />
-          <Text style={styles.headerTitle}>Agendamentos</Text>
         </TouchableOpacity>
+        <Text style={styles.headerTitle}>Meus Agendamentos</Text>
       </View>
 
+      {/* Lista */}
       {loading ? (
-        <Text style={styles.loading}>Carregando...</Text>
+        <ActivityIndicator size="large" color="#d5a759" style={{ marginTop: 50 }} />
       ) : (
         <ScrollView contentContainerStyle={styles.list}>
           {agendamentos.length === 0 ? (
-            <Text style={{ color: "#fff", textAlign: "center", marginTop: 40 }}>
-              Nenhum agendamento encontrado
-            </Text>
+            <Text style={styles.empty}>Nenhum agendamento encontrado.</Text>
           ) : (
-            agendamentos.map((a) => (
-              <View key={a.id} style={styles.card}>
-                <Text style={styles.date}>
-                  {a.data} - {a.hora}h
-                </Text>
-                <Text style={styles.email}>{a.emailcliente}</Text>
+            agendamentos
+              .sort((a, b) => (a.data > b.data ? 1 : -1))
+              .map((a) => (
+                <View key={a.id} style={styles.card}>
+                  <Text style={styles.date}>
+                    📅 {a.data} — {a.hora}
+                  </Text>
+                  <Text style={styles.service}>
+                    💈 {a.servico} — R$ {a.preco}
+                  </Text>
+                  <Text style={styles.email}>👤 {a.emailcliente}</Text>
 
-                <View style={styles.actions}>
-                  {a.status === "concluido" ? (
-                    <Text style={styles.concluido}>✅ Concluído</Text>
-                  ) : (
-                    <>
-                      <TouchableOpacity
-                        style={[styles.button, styles.cancelButton]}
-                        onPress={() => handleCancelar(a.id)}
-                      >
-                        <Text style={styles.cancelText}>Cancelar</Text>
-                      </TouchableOpacity>
+                  <View style={styles.actions}>
+                    {a.status === "concluido" ? (
+                      <Text style={styles.concluido}>✅ Concluído</Text>
+                    ) : (
+                      <>
+                        <TouchableOpacity
+                          style={[styles.button, styles.cancelButton]}
+                          onPress={() => handleCancelar(a.id)}
+                        >
+                          <Text style={styles.cancelText}>Cancelar</Text>
+                        </TouchableOpacity>
 
-                      <TouchableOpacity
-                        style={[styles.button, styles.confirmButton]}
-                        onPress={() => handleConfirmar(a.id)}
-                      >
-                        <Text style={styles.confirmText}>Confirmar</Text>
-                      </TouchableOpacity>
-                    </>
-                  )}
+                        <TouchableOpacity
+                          style={[styles.button, styles.confirmButton]}
+                          onPress={() => handleConfirmar(a.id)}
+                        >
+                          <Text style={styles.confirmText}>Concluir</Text>
+                        </TouchableOpacity>
+                      </>
+                    )}
+                  </View>
                 </View>
-              </View>
-            ))
+              ))
           )}
         </ScrollView>
       )}
@@ -134,7 +150,7 @@ export default function AgendamentosAdm() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#c",
+    color: "#f2f2f2",
     padding: 16,
   },
   header: {
@@ -147,37 +163,39 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   headerTitle: {
-    color: "#000",
+    color: "#333",
     fontSize: 20,
     fontWeight: "bold",
   },
-  loading: {
-    color: "#000",
-    textAlign: "center",
-    marginTop: 50,
-  },
   list: {
-    paddingBottom: 40,
+    paddingBottom: 60,
+  },
+  empty: {
+    color: "#f2f2f2",
+    textAlign: "center",
+    marginTop: 40,
+    fontSize: 16,
   },
   card: {
-    backgroundColor: "#fff",
+    backgroundColor: "#2b2b2b",
     borderRadius: 10,
     padding: 16,
     marginBottom: 15,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
   },
   date: {
-    fontSize: 16,
+    color: "#f2f2f2",
     fontWeight: "bold",
-    color: "#000",
+    fontSize: 16,
+  },
+  service: {
+    color: "#d5a759",
+    marginTop: 4,
+    fontSize: 15,
   },
   email: {
-    fontSize: 14,
+    color: "#ccc",
     marginTop: 4,
-    color: "#444",
+    fontSize: 14,
   },
   actions: {
     flexDirection: "row",
@@ -198,14 +216,14 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   confirmButton: {
-    backgroundColor: "#005a26ff",
+    backgroundColor: "#d5a759",
   },
   confirmText: {
-    color: "#fff",
+    color: "#1b1b1b",
     fontWeight: "bold",
   },
   concluido: {
-    color: "#005a26ff",
+    color: "#2ecc71",
     fontWeight: "bold",
   },
 });
