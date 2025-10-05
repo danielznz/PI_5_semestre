@@ -5,7 +5,6 @@ import { useRouter } from "expo-router";
 import { db } from "../lib/firebaseConfig";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 
-// 🔹 Tipagem para os serviços
 type Servico = {
     id: string;
     nome: string;
@@ -75,12 +74,6 @@ export default function GerenciarServicos() {
                             {/* Botões de ação */}
                             <View style={styles.actions}>
                                 <TouchableOpacity
-                                    style={styles.editButton}
-                                    onPress={() => router.push(`./barbeiro/editar/${servico.id}`)}
-                                >
-                                    <Ionicons name="pencil" size={22} color="#fff" />
-                                </TouchableOpacity>
-                                <TouchableOpacity
                                     style={styles.deleteButton}
                                     onPress={() =>
                                         Alert.alert(
@@ -127,7 +120,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
     editButton: {
-        backgroundColor: "#28a745",
+        backgroundColor: "#005a26ff",
         padding: 10,
         borderRadius: 6,
         marginRight: 10,

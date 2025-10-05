@@ -11,28 +11,28 @@ export default function AgendamentosAdm() {
   const [agendamentos, setAgendamentos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-useEffect(() => {
-  const fetchAgendamentos = async () => {
-    try {
-      const ref = collection(db, "agendamentos");
-      // pega todos os docs sem filtro
-      const snap = await getDocs(ref);
+  useEffect(() => {
+    const fetchAgendamentos = async () => {
+      try {
+        const ref = collection(db, "agendamentos");
+        // pega todos os docs sem filtro
+        const snap = await getDocs(ref);
 
-      const data = snap.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+        const data = snap.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
 
-      setAgendamentos(data);
-    } catch (err) {
-      console.error("Erro ao buscar agendamentos:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+        setAgendamentos(data);
+      } catch (err) {
+        console.error("Erro ao buscar agendamentos:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  fetchAgendamentos();
-}, []);
+    fetchAgendamentos();
+  }, []);
 
 
 
@@ -80,9 +80,9 @@ useEffect(() => {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={28} color="#fff" />
+          <Ionicons name="arrow-back" size={28} color="#333" />
+          <Text style={styles.headerTitle}>Agendamentos</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Agendamentos</Text>
       </View>
 
       {loading ? (
@@ -134,7 +134,7 @@ useEffect(() => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f0f4fa",
+    backgroundColor: "#c",
     padding: 16,
   },
   header: {
@@ -198,14 +198,14 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   confirmButton: {
-    backgroundColor: "#2ecc71",
+    backgroundColor: "#005a26ff",
   },
   confirmText: {
     color: "#fff",
     fontWeight: "bold",
   },
   concluido: {
-    color: "#2ecc71",
+    color: "#005a26ff",
     fontWeight: "bold",
   },
 });

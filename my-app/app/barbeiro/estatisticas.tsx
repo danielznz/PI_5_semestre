@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Dimensions, TouchableOpacity, ScrollView } from "react-native";
+import { View, Text, Dimensions, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
 import { BarChart } from "react-native-chart-kit";
+import { Ionicons } from "@expo/vector-icons";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../lib/firebaseConfig";
+import { useRouter } from "expo-router";
 
 export default function EstatisticasScreen() {
+  const router = useRouter();
   const [dados, setDados] = useState<number[]>([0, 0, 0, 0, 0, 0, 0]);
   const [periodo, setPeriodo] = useState<"semanal" | "mensal" | "anual">("semanal");
   const [totalAgendamentos, setTotalAgendamentos] = useState(0);
@@ -70,8 +73,8 @@ export default function EstatisticasScreen() {
     periodo === "semanal"
       ? ["Seg", "Ter", "Qua", "Qui", "Sex", "Sab", "Dom"]
       : periodo === "mensal"
-      ? ["Sem1", "Sem2", "Sem3", "Sem4"]
-      : ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul"];
+        ? ["Sem1", "Sem2", "Sem3", "Sem4"]
+        : ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul"];
 
   return (
     <ScrollView
@@ -81,86 +84,40 @@ export default function EstatisticasScreen() {
         backgroundColor: "#fff",
       }}
     >
-      <Text style={{ fontSize: 22, fontWeight: "bold", marginBottom: 20 }}>
-        Estatísticas
-      </Text>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={26} color="#333" />
+          <Text style={styles.title}>Estatísticas</Text>
+        </TouchableOpacity>
+      </View>
 
-      {/* Botões de filtro */}
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-around",
-          marginBottom: 20,
-        }}
-      >
+      <View style={styles.filterContainer}>
         <TouchableOpacity onPress={() => setPeriodo("semanal")}>
-          <Text style={{ fontWeight: periodo === "semanal" ? "bold" : "normal" }}>
-            Semanal
-          </Text>
+          <Text style={{ fontWeight: periodo === "semanal" ? "bold" : "normal" }}>Semanal</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => setPeriodo("mensal")}>
-          <Text style={{ fontWeight: periodo === "mensal" ? "bold" : "normal" }}>
-            Mensal
-          </Text>
+          <Text style={{ fontWeight: periodo === "mensal" ? "bold" : "normal" }}>Mensal</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => setPeriodo("anual")}>
-          <Text style={{ fontWeight: periodo === "anual" ? "bold" : "normal" }}>
-            Anual
-          </Text>
+          <Text style={{ fontWeight: periodo === "anual" ? "bold" : "normal" }}>Anual</Text>
         </TouchableOpacity>
       </View>
 
       {/* Indicadores */}
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-around",
-          marginBottom: 20,
-        }}
-      >
-        <View
-          style={{
-            backgroundColor: "#0a3d91",
-            padding: 15,
-            borderRadius: 10,
-            alignItems: "center",
-            width: "30%",
-          }}
-        >
-          <Text style={{ color: "#fff", fontSize: 16 }}>Concluídos</Text>
-          <Text style={{ color: "#fff", fontSize: 20, fontWeight: "bold" }}>
-            {totalAgendamentos}
-          </Text>
+      <View style={styles.indicatorsContainer}>
+        <View style={[styles.card, { backgroundColor: "#00367c" }]}>
+          <Text style={styles.cardLabel}>Concluídos</Text>
+          <Text style={styles.cardValue}>{totalAgendamentos}</Text>
         </View>
 
-        <View
-          style={{
-            backgroundColor: "#27ae60",
-            padding: 15,
-            borderRadius: 10,
-            alignItems: "center",
-            width: "30%",
-          }}
-        >
-          <Text style={{ color: "#fff", fontSize: 16 }}>Receita (R$)</Text>
-          <Text style={{ color: "#fff", fontSize: 20, fontWeight: "bold" }}>
-            {receitaTotal.toFixed(2)}
-          </Text>
+        <View style={[styles.card, { backgroundColor: "#005a26ff" }]}>
+          <Text style={styles.cardLabel}>Receita</Text>
+          <Text style={styles.cardValue}>{receitaTotal.toFixed(2)}</Text>
         </View>
 
-        <View
-          style={{
-            backgroundColor: "#f39c12",
-            padding: 15,
-            borderRadius: 10,
-            alignItems: "center",
-            width: "30%",
-          }}
-        >
-          <Text style={{ color: "#fff", fontSize: 16 }}>Avaliação</Text>
-          <Text style={{ color: "#fff", fontSize: 20, fontWeight: "bold" }}>
-            {mediaAvaliacao.toFixed(1)}
-          </Text>
+        <View style={[styles.card, { backgroundColor: "#f39c12" }]}>
+          <Text style={styles.cardLabel}>Avaliação</Text>
+          <Text style={styles.cardValue}>{mediaAvaliacao.toFixed(1)}</Text>
         </View>
       </View>
 
@@ -174,19 +131,84 @@ export default function EstatisticasScreen() {
         height={220}
         yAxisLabel=""
         yAxisSuffix=""
-        chartConfig={{
-          backgroundColor: "#ffffff",
-          backgroundGradientFrom: "#ffffff",
-          backgroundGradientTo: "#ffffff",
-          decimalPlaces: 0,
-          color: (opacity = 1) => `rgba(10, 61, 145, ${opacity})`,
-          labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-        }}
-        style={{
-          marginVertical: 8,
-          borderRadius: 16,
-        }}
+  chartConfig={{
+    backgroundColor: "#ffffff",
+    backgroundGradientFrom: "#ffffff",
+    backgroundGradientTo: "#ffffff",
+    decimalPlaces: 0,
+    color: (opacity = 1) => `rgba(10, 61, 145, ${opacity})`,
+    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+    barPercentage: 0.7, // 🔹 aumenta a largura das barras
+    propsForLabels: {
+      fontSize: 12,
+      fontWeight: "bold",
+    },
+  }}
+  style={styles.chart}
+  
       />
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  backButton: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginLeft: 10,
+  },
+  sectionTitle: {
+    fontSize: 22,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+  filterContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginBottom: 20,
+  },
+  indicatorsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginBottom: 20,
+  },
+  card: {
+    padding: 10,
+    borderRadius: 10,
+    alignItems: "center",
+    width: "30%",
+  },
+  cardLabel: {
+    color: "#fff",
+    fontSize: 14,
+  },
+  cardValue: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+
+  chart: {
+  marginTop: 40, // 🔹 empurra o gráfico mais para baixo
+  alignSelf: "center", // 🔹 centraliza o gráfico na tela
+  borderRadius: 16,
+  paddingRight: 20, // 🔹 dá mais espaço lateral à direita
+  paddingLeft: 20, // 🔹 dá mais espaço lateral à esquerda
+  backgroundColor: "#f8f8f8", // 🔹 fundo leve para destacar o gráfico
+  elevation: 3, // 🔹 leve sombra para destacar (Android)
+  shadowColor: "#000", // 🔹 sombra (iOS)
+  shadowOpacity: 0.1,
+  shadowRadius: 6,
+  shadowOffset: { width: 0, height: 3 },
+},
+
+});
