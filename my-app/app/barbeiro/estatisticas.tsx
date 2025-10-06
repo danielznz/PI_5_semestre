@@ -198,14 +198,14 @@ const styles = StyleSheet.create({
   },
 
   chart: {
-  marginTop: 40, // 🔹 empurra o gráfico mais para baixo
-  alignSelf: "center", // 🔹 centraliza o gráfico na tela
+  marginTop: 40, 
+  alignSelf: "center", 
   borderRadius: 16,
-  paddingRight: 20, // 🔹 dá mais espaço lateral à direita
-  paddingLeft: 20, // 🔹 dá mais espaço lateral à esquerda
-  backgroundColor: "#f8f8f8", // 🔹 fundo leve para destacar o gráfico
-  elevation: 3, // 🔹 leve sombra para destacar (Android)
-  shadowColor: "#000", // 🔹 sombra (iOS)
+  paddingRight: 20,
+  paddingLeft: 20, 
+  backgroundColor: "#f8f8f8", 
+  elevation: 3, 
+  shadowColor: "#000", 
   shadowOpacity: 0.1,
   shadowRadius: 6,
   shadowOffset: { width: 0, height: 3 },
