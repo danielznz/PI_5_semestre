@@ -21,6 +21,7 @@ import {
   serverTimestamp,
   addDoc,
   updateDoc,
+  getDoc,
   doc,
 } from "firebase/firestore";
 
@@ -159,6 +160,18 @@ export default function Agendamento() {
         return;
       }
 
+      const userRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userRef);
+
+      let nomeCliente = "";
+      let telefoneCliente = "";
+
+      if (userDoc.exists()) {
+        const dados = userDoc.data();
+        nomeCliente = dados.nome || "";
+        telefoneCliente = dados.telefone || "";
+      }
+
       // ✅ Agora salva o email real do barbeiro
       await addDoc(collection(db, "agendamentos"), {
         barbeiro: barbeiroEmail,
@@ -167,9 +180,12 @@ export default function Agendamento() {
         data: date.toLocaleDateString("pt-BR"),
         hora,
         emailcliente: user.email,
+        nomecliente: nomeCliente,
+        telefonecliente: telefoneCliente,
         status: "pendente",
         createdAt: serverTimestamp(),
       });
+
 
       // Atualizar disponibilidade do horário
       const horarioSelecionado = horariosDisponiveis.find((h) => h.hora === hora);

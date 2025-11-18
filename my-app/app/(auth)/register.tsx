@@ -10,6 +10,8 @@ import { Ionicons } from "@expo/vector-icons";
 export default function RegisterScreen() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [nome, setNome] = useState("");
+  const [telefone, setTelefone] = useState("");
   const [role, setRole] = useState<"admin" | "cliente">("cliente"); // padrão cliente
   const router = useRouter();
 
@@ -21,8 +23,10 @@ export default function RegisterScreen() {
 
       // salva no Firestore
       await setDoc(doc(db, "users", user.uid), {
-        email: email,
-        role: role,
+        email,
+        nome,
+        telefone,
+        role,
       });
 
       Alert.alert("Sucesso", "Conta criada com sucesso!");
@@ -45,6 +49,29 @@ export default function RegisterScreen() {
         />
 
         <Text style={styles.subtitle}>CADASTRO</Text>
+
+        <View style={styles.inputContainer}>
+          <Ionicons name="person-outline" size={20} color="#aaa" style={styles.icon} />
+          <TextInput
+            placeholder="Nome completo"
+            placeholderTextColor="#aaa"
+            style={styles.input}
+            value={nome}
+            onChangeText={setNome}
+          />
+        </View>
+
+        <View style={styles.inputContainer}>
+          <Ionicons name="call-outline" size={20} color="#aaa" style={styles.icon} />
+          <TextInput
+            placeholder="Telefone"
+            placeholderTextColor="#aaa"
+            style={styles.input}
+            value={telefone}
+            onChangeText={setTelefone}
+            keyboardType="phone-pad"
+          />
+        </View>
 
         <View style={styles.inputContainer}>
           <Ionicons name="mail-outline" size={20} color="#aaa" style={styles.icon} />

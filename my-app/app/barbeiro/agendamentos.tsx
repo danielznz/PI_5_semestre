@@ -115,7 +115,10 @@ export default function AgendamentosAdm() {
                   <Text style={styles.service}>
                     💈 {a.servico} — R$ {a.preco}
                   </Text>
-                  <Text style={styles.email}>👤 {a.emailcliente}</Text>
+                  <Text style={styles.email}>👤 {a.nomecliente}</Text>
+                  <Text style={styles.email}>📞 {a.telefonecliente}</Text>
+                  <Text style={styles.email}>✉️ {a.emailcliente}</Text>
+
 
                   <View style={styles.actions}>
                     {a.status === "concluido" ? (
@@ -193,7 +196,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   email: {
-    color: "#ccc",
+    color: "#ffffffff",
     marginTop: 4,
     fontSize: 14,
   },
