@@ -1,18 +1,50 @@
-import React from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from "react-native";
+import React, { useState } from "react";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Modal } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-
 
 export default function BarbeiroDashboard() {
   const router = useRouter();
 
+  const [exitModalVisible, setExitModalVisible] = useState(false);
+
   return (
     <View style={styles.container}>
+      
+      {/* MODAL DE CONFIRMAÇÃO */}
+      <Modal visible={exitModalVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle}>Deseja sair?</Text>
+            <Text style={styles.modalMessage}>Você será redirecionado para a tela anterior.</Text>
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalBtn, { backgroundColor: "#ccc" }]}
+                onPress={() => setExitModalVisible(false)}
+              >
+                <Text style={styles.modalBtnText}>Cancelar</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.modalBtn, { backgroundColor: "#d9534f" }]}
+                onPress={() => router.back()}
+              >
+                <Text style={styles.modalBtnText}>Sair</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       <ScrollView contentContainerStyle={styles.content}>
-        {/* Header customizado */}
+        
+        {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <TouchableOpacity
+            onPress={() => setExitModalVisible(true)}
+            style={styles.backButton}
+          >
             <Ionicons name="arrow-back" size={28} color="#333" />
           </TouchableOpacity>
         </View>
@@ -27,50 +59,42 @@ export default function BarbeiroDashboard() {
           onPress={() => router.push("/barbeiro/cadastrar")}
         >
           <View style={styles.circleContainer}>
-            <Image
-              source={require("../../assets/images/hairstyle.png")}
-              style={styles.imgcard}
-            />
+            <Image source={require("../../assets/images/hairstyle.png")} style={styles.imgcard} />
           </View>
           <Text style={styles.cardTitle}>Cadastrar Serviços</Text>
           <Text style={styles.cardSubtitle}>Adicione novos serviços disponíveis</Text>
         </TouchableOpacity>
 
-      <TouchableOpacity
+        <TouchableOpacity
           style={styles.card}
           onPress={() => router.push("/barbeiro/horario")}
         >
           <View style={styles.circleContainer}>
-            <Image
-              source={require("../../assets/images/time.png")}
-              style={styles.imgcard}
-            />
+            <Image source={require("../../assets/images/time.png")} style={styles.imgcard} />
           </View>
           <Text style={styles.cardTitle}>Definir Horários</Text>
           <Text style={styles.cardSubtitle}>Gerencie seus horários de trabalho</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.card}
-            onPress={() => router.push("/barbeiro/agendamentos")}>
+        <TouchableOpacity
+          style={styles.card}
+          onPress={() => router.push("/barbeiro/agendamentos")}
+        >
           <View style={styles.circleContainer}>
-            <Image
-              source={require("../../assets/images/checklist.png")}
-              style={styles.imgcard}
-            />
+            <Image source={require("../../assets/images/checklist.png")} style={styles.imgcard} />
           </View>
           <Text style={styles.cardTitle}>Ver Agendamentos</Text>
           <Text style={styles.cardSubtitle}>Acompanhe os agendamentos marcados</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.card}
-              onPress={() => router.push("/barbeiro/estatisticas")}>
+        <TouchableOpacity
+          style={styles.card}
+          onPress={() => router.push("/barbeiro/estatisticas")}
+        >
           <View style={styles.circleContainer}>
-            <Image
-              source={require("../../assets/images/statistics.png")}
-              style={styles.imgcard}
-            />
+            <Image source={require("../../assets/images/statistics.png")} style={styles.imgcard} />
           </View>
-          <Text style={styles.cardTitle}>Suas Estatisticas</Text>
+          <Text style={styles.cardTitle}>Suas Estatísticas</Text>
           <Text style={styles.cardSubtitle}>Veja seus Resultados</Text>
         </TouchableOpacity>
 
@@ -84,6 +108,49 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f2f2f2",
   },
+
+  /* ========== MODAL ========== */
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalBox: {
+    width: "80%",
+    backgroundColor: "#fff",
+    padding: 25,
+    borderRadius: 12,
+    elevation: 10,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 10,
+  },
+  modalMessage: {
+    fontSize: 16,
+    color: "#555",
+    marginBottom: 25,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  modalBtn: {
+    width: "48%",
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  modalBtnText: {
+    color: "#fff",
+    textAlign: "center",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+
+  /* ========== RESTANTE ========== */
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -114,10 +181,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 20,
     marginBottom: 30,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
     elevation: 4,
     alignItems: "center",
   },

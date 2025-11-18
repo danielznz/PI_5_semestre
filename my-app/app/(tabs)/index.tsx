@@ -1,17 +1,47 @@
-import React from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from "react-native";
+import React, { useState } from "react";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Modal } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
 export default function HomeScreen() {
   const router = useRouter();
 
+  const [exitModalVisible, setExitModalVisible] = useState(false);
+
   return (
     <View style={styles.container}>
+
+      {/* MODAL DE CONFIRMAÇÃO */}
+      <Modal visible={exitModalVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle}>Deseja sair?</Text>
+            <Text style={styles.modalMessage}>Você voltará para a tela anterior.</Text>
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalBtn, { backgroundColor: "#444" }]}
+                onPress={() => setExitModalVisible(false)}
+              >
+                <Text style={styles.modalBtnText}>Cancelar</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.modalBtn, { backgroundColor: "#d9534f" }]}
+                onPress={() => router.back()}
+              >
+                <Text style={styles.modalBtnText}>Sair</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       <ScrollView contentContainerStyle={styles.content}>
-        {/* Header customizado */}
+        
+        {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <TouchableOpacity onPress={() => setExitModalVisible(true)} style={styles.backButton}>
             <Ionicons name="arrow-back" size={28} color="#fff" />
           </TouchableOpacity>
         </View>
@@ -39,6 +69,7 @@ export default function HomeScreen() {
           <Text style={styles.cardTitle}>Histórico e Avaliações</Text>
           <Text style={styles.cardSubtitle}>Gerencie seus agendamentos</Text>
         </TouchableOpacity>
+
       </ScrollView>
     </View>
   );
@@ -49,6 +80,51 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#1b1b1bff",
   },
+
+  /* MODAL */
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalBox: {
+    width: "80%",
+    backgroundColor: "#2b2b2b",
+    padding: 25,
+    borderRadius: 12,
+    elevation: 10,
+    borderWidth: 1,
+    borderColor: "#d5a759",
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#d5a759",
+    marginBottom: 10,
+  },
+  modalMessage: {
+    fontSize: 16,
+    color: "#eee",
+    marginBottom: 25,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  modalBtn: {
+    width: "48%",
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  modalBtnText: {
+    color: "#fff",
+    textAlign: "center",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+
+  /* RESTANTE */
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -79,10 +155,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 20,
     marginBottom: 30,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
     elevation: 4,
     alignItems: "center",
   },
