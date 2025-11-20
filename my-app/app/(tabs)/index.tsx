@@ -20,14 +20,14 @@ export default function HomeScreen() {
 
             <View style={styles.modalButtons}>
               <TouchableOpacity
-                style={[styles.modalBtn, { backgroundColor: "#444" }]}
+                style={[styles.modalBtn, { backgroundColor: "#2b2b2b" }]}
                 onPress={() => setExitModalVisible(false)}
               >
                 <Text style={styles.modalBtnText}>Cancelar</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.modalBtn, { backgroundColor: "#d9534f" }]}
+                style={[styles.modalBtn, { backgroundColor: "#dc3545" }]}
                 onPress={() => router.back()}
               >
                 <Text style={styles.modalBtnText}>Sair</Text>
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   modalBtnText: {
-    color: "#fff",
+    color: "#f2f2f2",
     textAlign: "center",
     fontSize: 16,
     fontWeight: "bold",

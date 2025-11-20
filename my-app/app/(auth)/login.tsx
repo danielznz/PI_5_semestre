@@ -12,28 +12,49 @@ export default function LoginScreen() {
   const [senha, setSenha] = useState("");
   const router = useRouter();
 
-  const handleLogin = async () => {
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, senha);
-      const user = userCredential.user;
-      const userRef = doc(db, "users", user.uid);
-      const userSnap = await getDoc(userRef);
+const handleLogin = async () => {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, senha);
+    const user = userCredential.user;
+    const userRef = doc(db, "users", user.uid);
+    const userSnap = await getDoc(userRef);
 
-
-      if (userSnap.exists()) {
-        const data = userSnap.data();
-        if (data.role === "admin") {
-          router.push("/barbeiro");
-        } else {
-          router.push("/(tabs)");
-        }
+    if (userSnap.exists()) {
+      const data = userSnap.data();
+      if (data.role === "admin") {
+        router.push("/barbeiro");
       } else {
-        Alert.alert("Erro", "Usuário não encontrado no Firestore.");
+        router.push("/(tabs)");
       }
-    } catch (error: any) {
-      Alert.alert("Erro", error.message);
+    } else {
+      Alert.alert("Usuário não encontrado no sistema.");
     }
-  };
+
+  } catch (error: any) {
+    let mensagem = "Erro ao fazer login.";
+
+    switch (error.code) {
+      case "auth/user-not-found":
+        mensagem = "Nenhuma conta encontrada com este e-mail.";
+        break;
+      case "auth/wrong-password":
+        mensagem = "Senha incorreta. Tente novamente.";
+        break;
+      case "auth/invalid-email":
+        mensagem = "E-mail inválido. Verifique o endereço digitado.";
+        break;
+      case "auth/too-many-requests":
+        mensagem = "Muitas tentativas. Aguarde alguns instantes.";
+        break;
+      default:
+        mensagem = "Alguma coisa deu errado. Tente novamente.";
+        break;
+    }
+
+    Alert.alert(mensagem); // 👈 apenas 1 alert
+  }
+};
+
 
   return (
     <ImageBackground

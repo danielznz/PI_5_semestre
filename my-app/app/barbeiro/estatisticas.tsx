@@ -1,15 +1,25 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Dimensions, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  Dimensions,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+} from "react-native";
 import { BarChart } from "react-native-chart-kit";
 import { Ionicons } from "@expo/vector-icons";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../lib/firebaseConfig";
 import { useRouter } from "expo-router";
+import * as Print from "expo-print";
 
 export default function EstatisticasScreen() {
   const router = useRouter();
   const [dados, setDados] = useState<number[]>([0, 0, 0, 0, 0, 0, 0]);
-  const [periodo, setPeriodo] = useState<"semanal" | "mensal" | "anual">("semanal");
+  const [periodo, setPeriodo] = useState<"semanal" | "mensal" | "anual">(
+    "semanal"
+  );
   const [totalAgendamentos, setTotalAgendamentos] = useState(0);
   const [receitaTotal, setReceitaTotal] = useState(0);
   const [mediaAvaliacao, setMediaAvaliacao] = useState(0);
@@ -38,6 +48,7 @@ export default function EstatisticasScreen() {
 
         total++;
         somaPreco += data.preco || 0;
+
         if (data.avaliacao) {
           somaAvaliacoes += data.avaliacao;
           qtdAvaliacoes++;
@@ -63,7 +74,9 @@ export default function EstatisticasScreen() {
       setDados(contagem);
       setTotalAgendamentos(total);
       setReceitaTotal(somaPreco);
-      setMediaAvaliacao(qtdAvaliacoes > 0 ? somaAvaliacoes / qtdAvaliacoes : 0);
+      setMediaAvaliacao(
+        qtdAvaliacoes > 0 ? somaAvaliacoes / qtdAvaliacoes : 0
+      );
     } catch (e) {
       console.error("Erro ao buscar agendamentos:", e);
     }
@@ -73,9 +86,49 @@ export default function EstatisticasScreen() {
     periodo === "semanal"
       ? ["Seg", "Ter", "Qua", "Qui", "Sex", "Sab", "Dom"]
       : periodo === "mensal"
-        ? ["Sem1", "Sem2", "Sem3", "Sem4"]
-        : ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul"];
+      ? ["Sem1", "Sem2", "Sem3", "Sem4"]
+      : ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul"];
+ const gerarPDF = async () => {
+    const html = `
+      <html>
+        <body style="font-family: Arial; padding: 20px;">
+          <h1>Relatório de Estatísticas</h1>
+          <h3>Período: ${periodo.toUpperCase()}</h3>
+          
+          <h2>Indicadores</h2>
+          <p><strong>Total de Agendamentos:</strong> ${totalAgendamentos}</p>
+          <p><strong>Receita Total:</strong> R$ ${receitaTotal.toFixed(2)}</p>
+          <p><strong>Média de Avaliação:</strong> ${mediaAvaliacao.toFixed(
+            1
+          )}</p>
 
+          <h2>Dados do Gráfico</h2>
+          <table border="1" cellpadding="6" style="border-collapse: collapse;">
+            <tr>
+              <th>Label</th>
+              <th>Valor</th>
+            </tr>
+            ${labels
+              .map(
+                (label, index) => `
+              <tr>
+                <td>${label}</td>
+                <td>${dados[index]}</td>
+              </tr>
+            `
+              )
+              .join("")}
+          </table>
+
+          <p style="margin-top: 30px; font-size: 12px;">
+            Relatório gerado automaticamente pelo app nw.salon
+          </p>
+        </body>
+      </html>
+    `;
+
+    await Print.printAsync({ html });
+  };
   return (
     <ScrollView
       contentContainerStyle={{
@@ -93,13 +146,21 @@ export default function EstatisticasScreen() {
 
       <View style={styles.filterContainer}>
         <TouchableOpacity onPress={() => setPeriodo("semanal")}>
-          <Text style={{ fontWeight: periodo === "semanal" ? "bold" : "normal" }}>Semanal</Text>
+          <Text style={{ fontWeight: periodo === "semanal" ? "bold" : "normal" }}>
+            Semanal
+          </Text>
         </TouchableOpacity>
+
         <TouchableOpacity onPress={() => setPeriodo("mensal")}>
-          <Text style={{ fontWeight: periodo === "mensal" ? "bold" : "normal" }}>Mensal</Text>
+          <Text style={{ fontWeight: periodo === "mensal" ? "bold" : "normal" }}>
+            Mensal
+          </Text>
         </TouchableOpacity>
+
         <TouchableOpacity onPress={() => setPeriodo("anual")}>
-          <Text style={{ fontWeight: periodo === "anual" ? "bold" : "normal" }}>Anual</Text>
+          <Text style={{ fontWeight: periodo === "anual" ? "bold" : "normal" }}>
+            Anual
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -131,22 +192,26 @@ export default function EstatisticasScreen() {
         height={220}
         yAxisLabel=""
         yAxisSuffix=""
-  chartConfig={{
-    backgroundColor: "#ffffff",
-    backgroundGradientFrom: "#ffffff",
-    backgroundGradientTo: "#ffffff",
-    decimalPlaces: 0,
-    color: (opacity = 1) => `rgba(10, 61, 145, ${opacity})`,
-    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-    barPercentage: 0.7, // 🔹 aumenta a largura das barras
-    propsForLabels: {
-      fontSize: 12,
-      fontWeight: "bold",
-    },
-  }}
-  style={styles.chart}
-  
+        chartConfig={{
+          backgroundColor: "#ffffff",
+          backgroundGradientFrom: "#ffffff",
+          backgroundGradientTo: "#ffffff",
+          decimalPlaces: 0,
+          color: (opacity = 1) => `rgba(10, 61, 145, ${opacity})`,
+          labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+          barPercentage: 0.7, // 🔹 aumenta a largura das barras
+          propsForLabels: {
+            fontSize: 12,
+            fontWeight: "bold",
+          },
+        }}
+         style={styles.chart}
       />
+
+      {/* BOTÃO EXPORTAR PDF */}
+      <TouchableOpacity style={styles.pdfButton} onPress={gerarPDF}>
+        <Text style={styles.pdfButtonText}>Exportar como PDF</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }
@@ -165,11 +230,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     marginLeft: 10,
-  },
-  sectionTitle: {
-    fontSize: 22,
-    fontWeight: "bold",
-    marginBottom: 20,
   },
   filterContainer: {
     flexDirection: "row",
@@ -198,17 +258,29 @@ const styles = StyleSheet.create({
   },
 
   chart: {
-  marginTop: 40, 
-  alignSelf: "center", 
-  borderRadius: 16,
-  paddingRight: 20,
-  paddingLeft: 20, 
-  backgroundColor: "#f8f8f8", 
-  elevation: 3, 
-  shadowColor: "#000", 
-  shadowOpacity: 0.1,
-  shadowRadius: 6,
-  shadowOffset: { width: 0, height: 3 },
-},
+    marginTop: 40,
+    alignSelf: "center",
+    borderRadius: 16,
+    paddingRight: 20,
+    paddingLeft: 20,
+    backgroundColor: "#f8f8f8",
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 3 },
+  },
 
+  pdfButton: {
+    marginTop: 30,
+    backgroundColor: "#0A3D91",
+    padding: 14,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  pdfButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
 });
